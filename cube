@@ -1,0 +1,97 @@
+from PIL import Image, ImageDraw
+
+# Color mappings
+face_colors_rgb = {
+    'W': (255, 255, 255),
+    'Y': (255, 255, 0),
+    'O': (255, 165, 0),
+    'R': (255, 0, 0),
+    'G': (0, 128, 0),
+    'B': (0, 0, 255)
+}
+faces = ['U', 'D', 'L', 'R', 'F', 'B']
+colors = {'U': 'W', 'D': 'Y', 'L': 'O', 'R': 'R', 'F': 'G', 'B': 'B'}
+
+# Create a solved cube
+def create_cube():
+    return {face: [[colors[face]]*3 for _ in range(3)] for face in faces}
+
+# Rotate face (clockwise or counter-clockwise)
+def rotate_face(face, clockwise=True):
+    return [list(row) for row in zip(*face[::-1])] if clockwise else [list(row) for row in zip(*face)][::-1]
+
+# Apply U move
+def move_U(cube):
+    cube['U'] = rotate_face(cube['U'], True)
+    temp = cube['F'][0][:]
+    cube['F'][0] = cube['R'][0][:]
+    cube['R'][0] = cube['B'][0][:]
+    cube['B'][0] = cube['L'][0][:]
+    cube['L'][0] = temp
+    return cube
+
+# Apply U' move
+def move_U_prime(cube):
+    cube['U'] = rotate_face(cube['U'], False)
+    temp = cube['F'][0][:]
+    cube['F'][0] = cube['L'][0][:]
+    cube['L'][0] = cube['B'][0][:]
+    cube['B'][0] = cube['R'][0][:]
+    cube['R'][0] = temp
+    return cube
+
+# Draw a 3D-like view with top (U), front (F), right (R)
+def draw_isometric_cube(cube, move_name="Move"):
+    cell = 30
+    w = 6 * cell
+    h = 5 * cell
+    img = Image.new("RGB", (w, h), "white")
+    draw = ImageDraw.Draw(img)
+
+    def top_polygon(x, y):
+        return [(x, y), (x + cell, y - cell // 2), (x + 2 * cell, y), (x + cell, y + cell // 2)]
+
+    def front_polygon(x, y):
+        return [(x, y), (x + cell, y + cell // 2), (x + cell, y + cell + cell // 2), (x, y + cell)]
+
+    def right_polygon(x, y):
+        return [(x, y), (x + cell, y - cell // 2), (x + cell, y + cell), (x, y + cell + cell // 2)]
+
+    # Draw top (U)
+    for i in range(3):
+        for j in range(3):
+            color = face_colors_rgb[cube['U'][i][j]]
+            x = 2 * cell + j * cell
+            y = cell + i * cell // 2
+            draw.polygon(top_polygon(x, y), fill=color, outline="black")
+
+    # Draw front (F)
+    for i in range(3):
+        for j in range(3):
+            color = face_colors_rgb[cube['F'][i][j]]
+            x = 2 * cell + j * cell
+            y = 2 * cell + i * cell // 2
+            draw.polygon(front_polygon(x, y), fill=color, outline="black")
+
+    # Draw right (R)
+    for i in range(3):
+        for j in range(3):
+            color = face_colors_rgb[cube['R'][i][j]]
+            x = 5 * cell  # fixed x for right face
+            y = cell + j * cell // 2 + i * cell // 2
+            draw.polygon(right_polygon(x, y), fill=color, outline="black")
+
+    draw.text((10, 5), move_name, fill="black")
+    return img
+
+# Create cube states for U and U'
+cube_u = move_U(create_cube())
+cube_uprime = move_U_prime(create_cube())
+
+# Draw and save images
+img_u = draw_isometric_cube(cube_u, "U")
+img_uprime = draw_isometric_cube(cube_uprime, "U'")
+
+img_u.save("cube_move_U.png")
+img_uprime.save("cube_move_U_prime.png")
+print("Images saved: cube_move_U.png and cube_move_U_prime.png")
