@@ -1,0 +1,27 @@
+
+# Basic Rubik's Cube Representation and U Move
+
+faces = ['U', 'D', 'L', 'R', 'F', 'B']
+colors = {
+    'U': 'W',
+    'D': 'Y',
+    'L': 'O',
+    'R': 'R',
+    'F': 'G',
+    'B': 'B'
+}
+
+cube = {face: [[colors[face] for _ in range(3)] for _ in range(3)] for face in faces}
+
+def rotate_face_clockwise(face):
+    return [list(row) for row in zip(*face[::-1])]
+
+def move_U(cube_state):
+    cube_state['U'] = rotate_face_clockwise(cube_state['U'])
+    return cube_state
+
+def print_face(face):
+    return '\n'.join([' '.join(row) for row in face])
+
+cube_after_move = move_U(cube)
+print("U face after U move:\n", print_face(cube_after_move['U']))
