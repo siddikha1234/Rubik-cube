@@ -1,0 +1,41 @@
+
+# Full Rubik's Cube Representation and U/U' Move Example
+
+colors = {'U': 'W', 'D': 'Y', 'L': 'O', 'R': 'R', 'F': 'G', 'B': 'B'}
+faces = ['U', 'D', 'L', 'R', 'F', 'B']
+
+def create_cube():
+    return {face: [[colors[face]]*3 for _ in range(3)] for face in faces}
+
+def rotate_face(face, clockwise=True):
+    return [list(row) for row in zip(*face[::-1])] if clockwise else [list(row) for row in zip(*face)][::-1]
+
+def move_U(cube):  # Clockwise Up face
+    cube['U'] = rotate_face(cube['U'], True)
+    temp = cube['F'][0][:]
+    cube['F'][0] = cube['R'][0][:]
+    cube['R'][0] = cube['B'][0][:]
+    cube['B'][0] = cube['L'][0][:]
+    cube['L'][0] = temp
+    return cube
+
+def move_U_prime(cube):  # Counter-clockwise Up face
+    cube['U'] = rotate_face(cube['U'], False)
+    temp = cube['F'][0][:]
+    cube['F'][0] = cube['L'][0][:]
+    cube['L'][0] = cube['B'][0][:]
+    cube['B'][0] = cube['R'][0][:]
+    cube['R'][0] = temp
+    return cube
+
+def print_cube(cube):
+    for face in faces:
+        print(f"{face} face:")
+        for row in cube[face]:
+            print(" ".join(row))
+        print()
+
+cube = create_cube()
+cube = move_U(cube)
+cube = move_U_prime(cube)
+print_cube(cube)
